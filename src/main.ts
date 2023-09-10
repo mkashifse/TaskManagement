@@ -13,10 +13,15 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { aliases, fa } from 'vuetify/iconsets/fa'
 import colors from 'vuetify/lib/util/colors'
+import { VDatePicker } from 'vuetify/labs/VDatePicker'
+
 
 
 const vuetify = createVuetify({
-  components,
+  components:{
+    ...components,
+    VDatePicker
+  },
   directives,
   icons: {
     defaultSet: 'fa',
