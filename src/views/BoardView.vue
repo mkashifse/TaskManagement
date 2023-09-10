@@ -2,13 +2,27 @@
 import { useDragDrop } from "@/composables/useDragDrop";
 import { useStore } from "@/stores/store"
 import moment from "moment"
+import { computed, ref } from "vue";
 
-const { board } = useStore()
+const { board, totalTasks } = useStore()
 const { onDragStart, onDragEnd, onDrag, onDragOver, highlightDragItem } = useDragDrop()
 
- </script>
+const skill = ref<number>(20)
+
+const progress = computed(() => {
+  return ((board.done.length / totalTasks) * 100).toFixed(0);
+})
+
+</script>
 
 <template>
+  <VSheet class="mb-4 pa-1 bg-blue-lighten-4">
+    <v-progress-linear v-model="progress" color="blue" height="25">
+      <template v-slot:default="{ value }">
+        <strong> {{ value }}%</strong>
+      </template>
+    </v-progress-linear>
+  </VSheet>
   <VContainer fluid>
     <VRow>
       <VCol v-for="(column, i) of board">
@@ -84,8 +98,11 @@ const { onDragStart, onDragEnd, onDrag, onDragOver, highlightDragItem } = useDra
 
 .no-select {
   user-select: none;
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
-  -webkit-user-select: none; /* Safari/Chrome */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  -webkit-user-select: none;
+  /* Safari/Chrome */
 }
 </style>

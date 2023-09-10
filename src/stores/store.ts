@@ -22,8 +22,19 @@ export const useStore = defineStore('board', () => {
     board.value[colType].push(task);
   }
 
+  const totalTasks = computed(() => {
+    let count = 0;
+    for (let column in board.value) {
+      for (let task of board.value[column as ColumnType]) {
+        count++;
+      }
+    }
+    return count;
+  })
+
   return {
     board,
-    addTask
+    addTask,
+    totalTasks,
   }
 })
