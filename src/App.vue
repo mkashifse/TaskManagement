@@ -23,11 +23,16 @@ const board = ref<Board>({
 })
 
 
-console.log(board)
 const dragItem = ref<ITask>();
 const dragFrom = ref<string>("")
+const dragTo = ref<string>("")
 
-function allowDrop(ev: any) { ev.preventDefault() }
+function allowDrop(ev: any) {
+  ev.preventDefault() 
+  dragTo.value = ev.target.getAttribute("data-column");
+  console.log(dragTo.value)
+
+}
 
 function drag(ev: any) {
   const dragItemId = ev.target.getAttribute("data-id")
@@ -37,16 +42,12 @@ function drag(ev: any) {
 }
 
 function drop(ev: any) {
-  ev.preventDefault();
-  const dragTo = ev.target.getAttribute("data-column");
   console.log(dragFrom.value, "===>>>>>>", dragTo);
-  console.log(dragItem)
-
-  if (dragTo) {
+  if (dragTo.value) {
     board.value[dragFrom.value as ColumnType] = board.value[dragFrom.value as ColumnType]
       .filter((item) => item.id !== dragItem.value!.id)
 
-    board.value[dragTo as ColumnType].push(dragItem.value!)
+    board.value[dragTo.value as ColumnType].push(dragItem.value!)
   }
 
 }
@@ -57,8 +58,8 @@ function drop(ev: any) {
     <VContainer fluid>
       <VRow>
         <VCol v-for="(column, i) of board">
-          <VSheet rounded class="pa-3" elevation="4" @drop="drop" @dragover="allowDrop" :data-column="i">
-            <h3 style="text-transform: capitalize;" :data-column="i">{{ i }}</h3>
+          <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" @drop.self="drop" @dragover="allowDrop" :data-column="i">
+            <h3 style="text-transform: capitalize;" class="border" >{{ i }}</h3>
             <!-- Task Template -->
             <VSheet border rounded class="pa-2 mb-2" v-for="(item, j) of column" :key="j" :title="item.title"
               draggable="true" @drag="drag" :data-id="item.id" :data-column="i">
@@ -79,7 +80,7 @@ function drop(ev: any) {
                 <p>{{ item.attachments }}</p>
               </div>
             </VSheet>
-            <div v-if="column.length === 0" :data-column="i">
+            <div v-if="column.length === 0">
               No task found
             </div>
           </VSheet>
