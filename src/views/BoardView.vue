@@ -25,7 +25,7 @@ const progress = computed(() => {
   </VSheet>
   <VContainer>
     <VRow>
-      <VCol v-for="(column, i) of board" style="max-width: 400px;">
+      <VCol v-for="(column, i) of board" cols="12" sm="4">
         <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" :data-column="i" @dragover="onDragOver">
           <h3 style="text-transform: capitalize;" class="no-select">{{ i }}</h3>
           <!-- Task Template -->
