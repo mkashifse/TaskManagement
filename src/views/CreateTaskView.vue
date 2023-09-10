@@ -20,7 +20,7 @@ const formData = ref<{
 }>({
   selectedColumn: ColumnType.Pending,
   title: 'New task',
-  description: 'some description',
+  description: `Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.`,
   estimatedTime: "11:38 AM",
   estimatedDate: new Date(),
   attachments: [],
@@ -36,6 +36,7 @@ const columns = ref<string[]>(["pending", "processing", "done"])
 const tags = ref<string[]>(["Task", "Bug", "Improvement", "Modification", "High Priority", "Low Priority", 'Normal'])
 const formRef = ref<any>();
 const fileInput = ref<any>();
+const isShowSnackBar = ref<boolean>(false);
 
 const titleRules = [
   (v: string) => !!v || 'Title is required',
@@ -63,6 +64,7 @@ const submitForm = () => {
   const newTask: any = { id: v4(), isPlaceholder: false, ...formData.value }
   console.log(newTask);
   addTask(formData.value.selectedColumn, newTask)
+  isShowSnackBar.value = true
 };
 
 const onChangeFileLoad = (file: any) => {
@@ -97,6 +99,7 @@ const loadFileThumbnails = () => {
 
 <template>
   <VContainer class="pa-4">
+    <VSnackbar color="success" v-model="isShowSnackBar" timeout="2000">Task has been successfully added</VSnackbar>
     <v-form ref="form" @submit.prevent="submitForm">
       <VCard rounded>
         <VCardTitle>Create New Task</VCardTitle>

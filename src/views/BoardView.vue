@@ -29,40 +29,40 @@ const progress = computed(() => {
         <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" :data-column="i" @dragover="onDragOver">
           <h3 style="text-transform: capitalize;" class="no-select">{{ i }}</h3>
           <!-- Task Template -->
-          <div class="pa-2 mb-2 bg-placeholder rounded border" v-for="(item, j) of column" :key="j" :title="item.title"
+          <div class="mb-2 bg-placeholder rounded border" v-for="(item, j) of column" :key="j" :title="item.title"
             draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" @drag="onDrag" :data-index="j"
             :class="highlightDragItem(item)">
             <VExpandTransition>
               <div v-if="item.isPlaceholder" style="height: 150px;">
               </div>
               <div v-else>
-                <div>
-                  <label class="text-caption">Task:</label>
-                  <p>{{ item.title }}</p>
-                </div>
-                <div>
-                  <label class="text-caption">Description:</label>
-                  <p>{{ item.description }}</p>
-                </div>
-                <div>
-                  <label class="text-caption">Estimated Date:</label>
-                  <p>{{ moment(item.estimatedDate).format("YYYY/MM/DD") }} {{ item.estimatedTime }}</p>
-                </div>
-                <div>
-                  <label class="text-caption mr-2">TAGS:</label>
+                <VCardTitle>{{ item.title }} </VCardTitle>
+                <VCardText>
+                  <p class="mb-2">
+                    {{ item.description }}
+                  </p>
+                  <div v-if="item.attachments?.length">
+                    <label class="text-caption">
+                      <VIcon icon="fa fa-paperclip" size="12"></VIcon> {{ item.attachments.length }} Attachments
+                    </label>
+                    <div class="flex align-center">
+                      <template v-for="(img, i) in item.fileThumbnails">
+                        <img height="32" v-if="img.type.includes('image')" class="mr-2" cover :src="img.src" />
+                        <VIcon v-else icon="fa fa-file"></VIcon>
+                      </template>
+                    </div>
+                  </div>
+                </VCardText>
+                <VDivider></VDivider>
+
+                <VCardActions>
                   <div>
-                    <VChip class="mr-2" v-for="(tag, i) in item.tags" :key="i" :color="tagsColorMap[tag]">{{ tag }}
+                    <VChip class="mr-2" v-for="(tag, i) in item.tags" :key="i" :color="tagsColorMap[tag]">
+                      <VIcon icon="fa fa-tag" class="mr-2" size="16"></VIcon>
+                      {{ tag }}
                     </VChip>
                   </div>
-                </div>
-                <div v-if="item.attachments?.length">
-                  <label class="text-caption">
-                    <VIcon icon="fa fa-paperclip" size="12"></VIcon> Attachments:
-                  </label>
-                  <p>
-                    {{ item.attachments.length }} Files
-                  </p>
-                </div>
+                </VCardActions>
               </div>
             </VExpandTransition>
           </div>

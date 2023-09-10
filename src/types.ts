@@ -16,8 +16,9 @@ export interface ITask {
     description: string,
     estimatedTime?: string,
     estimatedDate?: string,
-    attachments?: string,
+    attachments?: any[],
     isPlaceholder: boolean,
+    fileThumbnails: IThumb[],
     tags: string[],
     ref: HTMLElement
 }
