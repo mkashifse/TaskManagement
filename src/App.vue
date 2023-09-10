@@ -98,7 +98,7 @@ const highlightDragItem = (item: ITask) => {
           <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" :data-column="i" @dragover="onDragOver">
             <h3 style="text-transform: capitalize;">{{ i }}</h3>
             <!-- Task Template -->
-            <div rounded class="pa-2 mb-2 bg-placeholder rounded" v-for="(item, j) of column" :key="j" :title="item.title"
+            <div class="pa-2 mb-2 bg-placeholder rounded border" v-for="(item, j) of column" :key="j" :title="item.title"
               draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" @drag="onDrag" :data-index="j"
               :class="highlightDragItem(item)">
               <VExpandTransition>
