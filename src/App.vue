@@ -76,8 +76,8 @@ const onDragOver = (ev: DragEvent) => {
   placeHolderIndex.value = nearTaskIndex;
 }
 
-const highlightDragItem = (id: string) => {
-  return isDragging.value && id === dragItem.value?.id ? 'rotate' : ''
+const highlightDragItem = (item: ITask) => {
+  return item.isPlaceholder ? 'bg-placeholder' : 'bg-task'
 }
 
 
@@ -91,10 +91,10 @@ const highlightDragItem = (id: string) => {
           <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" :data-column="i" @dragover="onDragOver">
             <h3 style="text-transform: capitalize;">{{ i }}</h3>
             <!-- Task Template -->
-            <VSheet border rounded class="pa-2 mb-2" v-for="(item, j) of column" :key="j" :title="item.title"
+            <div rounded class="pa-2 mb-2 bg-placeholder rounded" v-for="(item, j) of column" :key="j" :title="item.title"
               draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" :data-index="j"
-              :class="highlightDragItem(item.id!)">
-              <div v-if="item.isPlaceholder" style="height: 150px; background-color: rgb(29, 30, 43);">
+              :class="highlightDragItem(item)">
+              <div v-if="item.isPlaceholder" style="height: 150px;">
               </div>
               <div v-else>
                 <div>
@@ -114,7 +114,7 @@ const highlightDragItem = (id: string) => {
                   <p>{{ item.attachments }}</p>
                 </div>
               </div>
-            </VSheet>
+            </div>
             <div v-if="column.length === 0">
               No task found
             </div>
@@ -151,5 +151,15 @@ const highlightDragItem = (id: string) => {
   transform: rotate(12deg) scale(1.1) skew(-11deg);
   -webkit-transform: rotate(12deg) scale(1.1) skew(-11deg);
   -moz-transform: rotate(12deg) scale(1.1) skew(-11deg);
+}
+
+.bg-placeholder {
+  background: rgba(255, 255, 255, 0.737);
+}
+.bg-task {
+  background: white;
+}
+.task{
+  border-radius: 5px;
 }
 </style>
