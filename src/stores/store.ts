@@ -32,9 +32,19 @@ export const useStore = defineStore('board', () => {
     return count;
   })
 
+  const tagsColorMap = ref<Record<string, string>>({
+    "Task": "blue",
+    "Bug": "red",
+    "Improvement": "green",
+    "Modification": "indigo",
+    "High Priority": "red",
+    "Low Priority": "purple",
+  })
+
   return {
     board,
     addTask,
     totalTasks,
+    tagsColorMap
   }
 })

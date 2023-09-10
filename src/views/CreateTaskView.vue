@@ -6,7 +6,7 @@ import { useStore } from "./../stores/store"
 import moment from "moment";
 import { v4 } from 'uuid';
 
-const store = useStore();
+const { addTask, tagsColorMap } = useStore();
 
 const formData = ref<{
   selectedColumn: ColumnType,
@@ -25,9 +25,13 @@ const formData = ref<{
   estimatedDate: new Date(),
   attachments: [],
   fileThumbnails: [],
-  tags: ['Task']
+  tags: []
 });
 
+interface ITag {
+  text: string;
+  color: string;
+}
 const columns = ref<string[]>(["pending", "processing", "done"])
 const tags = ref<string[]>(["Task", "Bug", "Improvement", "Modification", "High Priority", "Low Priority", 'Normal'])
 const formRef = ref<any>();
@@ -56,7 +60,7 @@ const attachmentRules = [
 
 const submitForm = () => {
   loadFileThumbnails();
-  store.addTask(formData.value.selectedColumn, { id: v4(), isPlaceholder: false, ...formData.value } as any)
+  addTask(formData.value.selectedColumn, { id: v4(), isPlaceholder: false, ...formData.value } as any)
 };
 
 const onChangeFileLoad = (file: any) => {
@@ -138,7 +142,16 @@ const loadFileThumbnails = () => {
 
             </VCol>
             <VCol cols="12" sm="6">
-              <VCombobox :items="tags" clearable chips multiple label="Tags" v-model="formData.tags"></VCombobox>
+              <VCombobox multiple clearable label="Tags" :items="tags">
+                <template v-slot:selection="data">
+                  <v-chip :key="JSON.stringify(data.item)" v-bind="data.attrs" :model-value="data.selected"
+                    :disabled="data.disabled" size="small" @click:close="data.parent.selectItem(data.item)"
+                    :color="tagsColorMap[data.item.title]">
+                    <VIcon icon="fa fa-tag" class="mr-2"></VIcon>
+                    {{ data.item.title }}
+                  </v-chip>
+                </template>
+              </VCombobox>
               <VTextField type="time" v-model="formData.estimatedTime" label="Estimated Time" required
                 :rules="estimatedTimeRules"></VTextField>
               <VDatePicker v-model="formData.estimatedDate" label="Estimated Date" required :rules="estimatedDateRules">
