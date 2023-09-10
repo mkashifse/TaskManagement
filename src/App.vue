@@ -53,6 +53,13 @@ const onDragEnd = (ev: DragEvent) => {
 
 }
 
+
+const onDrag = (ev: DragEvent) => {
+  const el = (ev.target as HTMLElement);
+  el.classList.add('v-speed-dial')
+}
+
+
 const onDragOver = (ev: DragEvent) => {
   ev.preventDefault()
   const el = (ev.target as HTMLElement);
@@ -92,28 +99,30 @@ const highlightDragItem = (item: ITask) => {
             <h3 style="text-transform: capitalize;">{{ i }}</h3>
             <!-- Task Template -->
             <div rounded class="pa-2 mb-2 bg-placeholder rounded" v-for="(item, j) of column" :key="j" :title="item.title"
-              draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" :data-index="j"
+              draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" @drag="onDrag" :data-index="j"
               :class="highlightDragItem(item)">
-              <div v-if="item.isPlaceholder" style="height: 150px;">
-              </div>
-              <div v-else>
-                <div>
-                  <label class="text-caption">Task:</label>
-                  <p>{{ item.title }}</p>
+              <VExpandTransition>
+                <div v-if="item.isPlaceholder" style="height: 150px;">
                 </div>
-                <div>
-                  <label class="text-caption">Description:</label>
-                  <p>{{ item.description }}</p>
+                <div v-else>
+                  <div>
+                    <label class="text-caption">Task:</label>
+                    <p>{{ item.title }}</p>
+                  </div>
+                  <div>
+                    <label class="text-caption">Description:</label>
+                    <p>{{ item.description }}</p>
+                  </div>
+                  <div>
+                    <label class="text-caption">Estimated Time: {{ item.isPlaceholder }}</label>
+                    <p>{{ item.estimatedTime }}</p>
+                  </div>
+                  <div>
+                    <label class="text-caption">Attachments:</label>
+                    <p>{{ item.attachments }}</p>
+                  </div>
                 </div>
-                <div>
-                  <label class="text-caption">Estimated Time: {{ item.isPlaceholder }}</label>
-                  <p>{{ item.estimatedTime }}</p>
-                </div>
-                <div>
-                  <label class="text-caption">Attachments:</label>
-                  <p>{{ item.attachments }}</p>
-                </div>
-              </div>
+              </VExpandTransition>
             </div>
             <div v-if="column.length === 0">
               No task found
@@ -156,10 +165,12 @@ const highlightDragItem = (item: ITask) => {
 .bg-placeholder {
   background: rgba(255, 255, 255, 0.737);
 }
+
 .bg-task {
   background: white;
 }
-.task{
+
+.task {
   border-radius: 5px;
 }
 </style>
