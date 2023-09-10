@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { useDragDrop } from "@/composables/useDragDrop";
 import { useStore } from "@/stores/store"
+import moment from "moment"
 
 const { board } = useStore()
 const { onDragStart, onDragEnd, onDrag, onDragOver, highlightDragItem } = useDragDrop()
 
-</script>
+ </script>
 
 <template>
   <VContainer fluid>
     <VRow>
       <VCol v-for="(column, i) of board">
         <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" :data-column="i" @dragover="onDragOver">
-          <h3 style="text-transform: capitalize;">{{ i }}</h3>
+          <h3 style="text-transform: capitalize;" class="no-select">{{ i }}</h3>
           <!-- Task Template -->
           <div class="pa-2 mb-2 bg-placeholder rounded border" v-for="(item, j) of column" :key="j" :title="item.title"
             draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" @drag="onDrag" :data-index="j"
@@ -30,8 +31,8 @@ const { onDragStart, onDragEnd, onDrag, onDragOver, highlightDragItem } = useDra
                   <p>{{ item.description }}</p>
                 </div>
                 <div>
-                  <label class="text-caption">Estimated Time: {{ item.isPlaceholder }}</label>
-                  <p>{{ item.estimatedTime }}</p>
+                  <label class="text-caption">Estimated Date: {{ item.isPlaceholder }}</label>
+                  <p>{{ moment(item.estimatedDate).format("YYYY/MM/DD") }} {{ item.estimatedTime }}</p>
                 </div>
                 <div>
                   <label class="text-caption">Attachments:</label>
@@ -80,5 +81,11 @@ const { onDragStart, onDragEnd, onDrag, onDragOver, highlightDragItem } = useDra
 .task {
   border-radius: 5px;
 }
+
+.no-select {
+  user-select: none;
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  -webkit-user-select: none; /* Safari/Chrome */
+}
 </style>
-@/composable/useDragDrop

@@ -3,28 +3,33 @@
 import { ColumnType, type ITask, type IThumb } from '@/types';
 import { ref } from 'vue';
 import { useStore } from "./../stores/store"
+import moment from "moment";
+import { v4 } from 'uuid';
 
 const store = useStore();
 
 const formData = ref<{
+  selectedColumn: ColumnType,
   title: string;
   description: string;
   estimatedTime: string;
-  estimatedDate: string;
+  estimatedDate: Date;
   attachments: File[],
-  fileThumbnails: IThumb[]
+  fileThumbnails: IThumb[],
+  tags: string[],
 }>({
-  title: '',
-  description: '',
-  estimatedTime: '',
-  estimatedDate: '',
+  selectedColumn: ColumnType.Pending,
+  title: 'New task',
+  description: 'some description',
+  estimatedTime: "11:38 AM",
+  estimatedDate: new Date(),
   attachments: [],
-  fileThumbnails: []
+  fileThumbnails: [],
+  tags: ['Task']
 });
 
 const columns = ref<string[]>(["pending", "processing", "done"])
-const selectedColumn = ref<ColumnType>(ColumnType.Pending);
-const tags = ref<string[]>(["Task", "Bug", "Improvement", "Modification", "High Priority", "Low Priority"])
+const tags = ref<string[]>(["Task", "Bug", "Improvement", "Modification", "High Priority", "Low Priority", 'Normal'])
 const formRef = ref<any>();
 const fileInput = ref<any>();
 
@@ -51,8 +56,7 @@ const attachmentRules = [
 
 const submitForm = () => {
   loadFileThumbnails();
-  console.log(formData.value)
-  store.addTask(selectedColumn.value, formData.value as any)
+  store.addTask(formData.value.selectedColumn, { id: v4(), isPlaceholder: false, ...formData.value } as any)
 };
 
 const onChangeFileLoad = (file: any) => {
@@ -86,7 +90,6 @@ const loadFileThumbnails = () => {
 
 
 <template>
-
   <VContainer class="pa-4">
     <v-form ref="form" @submit.prevent="submitForm">
       <VCard rounded>
@@ -95,7 +98,7 @@ const loadFileThumbnails = () => {
         <VContainer>
           <VRow>
             <VCol cols="12" sm="6">
-              <VSelect :items="columns" label="Board Column" v-model="selectedColumn"></VSelect>
+              <VSelect :items="columns" label="Board Column" v-model="formData.selectedColumn"></VSelect>
               <v-text-field v-model="formData.title" label="Title" required :rules="titleRules"></v-text-field>
 
               <v-textarea v-model="formData.description" label="Description" required
@@ -135,7 +138,7 @@ const loadFileThumbnails = () => {
 
             </VCol>
             <VCol cols="12" sm="6">
-              <VCombobox :items="tags" clearable chips multiple label="Tags"></VCombobox>
+              <VCombobox :items="tags" clearable chips multiple label="Tags" v-model="formData.tags"></VCombobox>
               <VTextField type="time" v-model="formData.estimatedTime" label="Estimated Time" required
                 :rules="estimatedTimeRules"></VTextField>
               <VDatePicker v-model="formData.estimatedDate" label="Estimated Date" required :rules="estimatedDateRules">

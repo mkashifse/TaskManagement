@@ -12,12 +12,13 @@ interface Board {
 export const useStore = defineStore('board', () => {
 
   const board = ref<Board>({
-    pending: new Array(5).fill(1).map((item, i) => ({ id: v4(), title: 'Lorem ' + i, isPlaceholder: false })) as any,
+    pending: new Array(2).fill(1).map((item, i) => ({ id: v4(), title: 'Lorem ' + i, isPlaceholder: false })) as any,
     processing: [],
     done: []
   })
 
   const addTask = (colType: ColumnType, task: ITask) => {
+    task.isPlaceholder = false;
     board.value[colType].push(task);
   }
 
