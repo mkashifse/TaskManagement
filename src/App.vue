@@ -4,6 +4,7 @@ import type { ITask } from './stores/store';
 import type VTask from './components/VTask.vue';
 import { v4 } from "uuid"
 import { computed } from 'vue';
+import type { VueElement } from 'vue';
 
 enum ColumnType {
   Pending = 'pending',
@@ -18,7 +19,7 @@ interface Board {
 }
 
 const board = ref<Board>({
-  pending: new Array(5).fill(1).map((item, i) => ({ id: v4(), title: 'Lorem ' + i })) as any,
+  pending: new Array(5).fill(1).map((item, i) => ({ id: v4(), title: 'Lorem ' + i, isPlaceholder: false })) as any,
   processing: [],
   done: []
 })
@@ -29,24 +30,56 @@ const dragFrom = ref<string>("")
 const dragTo = ref<string>("")
 const dragItemId = ref<string>("")
 const isDragging = ref<boolean>(false)
+const taskElements = ref<VueElement[]>([])
+const closestTaskIndex = ref<number>(0);
 
 function allowDrop(ev: any) {
   ev.preventDefault()
   dragTo.value = ev.target.getAttribute("data-column");
-  console.log(dragTo.value)
-
 }
 
-function drag(ev: any) {
+function dragStart(ev: any) {
   dragItemId.value = ev.target.getAttribute("data-id")
   dragFrom.value = ev.target.getAttribute("data-column");
   const column = board.value[dragFrom.value as ColumnType];
   dragItem.value = column.find((item) => item.id === dragItemId.value);
   isDragging.value = true;
+  board.value[dragFrom.value as ColumnType] = board.value[dragFrom.value as ColumnType].filter((item) => item.id !== dragItem.value?.id)
 }
+
+function drag(ev: any) {
+  insertAboveTask(ev.clientY)
+}
+
+function insertAboveTask(mouseY: number) {
+  let closestOffset = Number.NEGATIVE_INFINITY;
+
+  taskElements.value.forEach((taskEl: any) => {
+    const { top } = taskEl.$el.getBoundingClientRect();
+    const offset = mouseY - top;
+    if (offset < 0 && offset > closestOffset) {
+      closestOffset = offset;
+      const closestIndex = +taskEl.$el.getAttribute("data-ids").split('-')[1]
+      closestTaskIndex.value = closestIndex ? closestIndex : board.value.pending.length - 1
+      console.log("INDEX=>", closestTaskIndex.value)
+      if (dragItem.value) {
+        board.value.pending = board.value.pending.filter((item: ITask) => !item.isPlaceholder)
+        const item = { ...dragItem.value, isPlaceholder: true }
+        board.value.pending.splice(closestTaskIndex.value, 0, item)
+      }
+    }
+  })
+}
+
 
 function dragEnd() {
   isDragging.value = false;
+  console.log("EL===>>>>", taskElements.value)
+  console.log(board.value.pending.map((item) => item.isPlaceholder))
+  board.value.pending = board.value.pending.filter((item: ITask) => dragItemId.value !== item.id || item.isPlaceholder)
+  board.value.pending.forEach((item) => {
+    item.isPlaceholder = false;
+  })
 }
 
 const highlightDragItem = (id: string) => {
@@ -55,13 +88,19 @@ const highlightDragItem = (id: string) => {
 
 
 function drop(ev: any) {
-  console.log(dragFrom.value, "===>>>>>>", dragTo);
-  if (dragTo.value) {
-    board.value[dragFrom.value as ColumnType] = board.value[dragFrom.value as ColumnType]
-      .filter((item) => item.id !== dragItem.value!.id)
+  // console.log(dragFrom.value, "===>>>>>>", dragTo.value);
+  // console.log([...board.value.pending])
 
-    board.value[dragTo.value as ColumnType].push(dragItem.value!)
-  }
+
+  // if (dragTo.value) {
+  //   console.log("DOING....")
+  //   // board.value[dragFrom.value as ColumnType] = board.value[dragFrom.value as ColumnType]
+  //   //   .filter((item) => item.id !== dragItem.value!.id)
+
+
+  //   // board.value[dragTo.value as ColumnType].push(dragItem.value!)
+  //   dragItemId.value = ''
+  // }
 
 }
 </script>
@@ -75,9 +114,9 @@ function drop(ev: any) {
             :data-column="i">
             <h3 style="text-transform: capitalize;" class="border">{{ i }}</h3>
             <!-- Task Template -->
-            <VSheet border rounded class="pa-2 mb-2" v-for="(item, j) of column" :key="j" :title="item.title"
-              draggable="true" @drag="drag" @dragend="dragEnd" :data-id="item.id" :data-column="i"
-              :class="highlightDragItem(item.id!)">
+            <VSheet border rounded class="pa-2 mb-2" ref="taskElements" v-for="(item, j) of column" :key="j"
+              :title="item.title" draggable="true" @dragstart="dragStart" @drag="drag" @dragend="dragEnd"
+              :data-id="item.id" :data-ids="i + '-' + j" :data-column="i" :class="highlightDragItem(item.id!)">
               <div>
                 <label class="text-caption">Task:</label>
                 <p>{{ item.title }}</p>
@@ -87,7 +126,7 @@ function drop(ev: any) {
                 <p>{{ item.description }}</p>
               </div>
               <div>
-                <label class="text-caption">Estimated Time:</label>
+                <label class="text-caption">Estimated Time: {{ item.isPlaceholder }}</label>
                 <p>{{ item.estimatedTime }}</p>
               </div>
               <div>

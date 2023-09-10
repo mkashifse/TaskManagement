@@ -7,7 +7,8 @@ export interface ITask {
   title: string,
   description: string,
   estimatedTime?: string,
-  attachments?: string
+  attachments?: string,
+  isPlaceholder: boolean,
 }
 
 export const useStore = defineStore('tasks', () => {
