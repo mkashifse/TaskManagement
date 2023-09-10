@@ -23,9 +23,9 @@ const progress = computed(() => {
       </template>
     </v-progress-linear>
   </VSheet>
-  <VContainer fluid>
+  <VContainer>
     <VRow>
-      <VCol v-for="(column, i) of board">
+      <VCol v-for="(column, i) of board" style="max-width: 400px;">
         <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" :data-column="i" @dragover="onDragOver">
           <h3 style="text-transform: capitalize;" class="no-select">{{ i }}</h3>
           <!-- Task Template -->
@@ -36,12 +36,11 @@ const progress = computed(() => {
               <div v-if="item.isPlaceholder" style="height: 150px;">
               </div>
               <div v-else>
-                <VCardTitle>{{ item.title }} </VCardTitle>
-                <VCardText>
-                  <p class="mb-2">
-                    {{ item.description }}
-                  </p>
-                  <div v-if="item.attachments?.length">
+                <VCardTitle >{{ item.title }} </VCardTitle>
+                <VDivider></VDivider>
+                <VCardText class="truncate-text">
+                  {{ item.description }}
+                  <div v-if="item.attachments?.length" class="mt-4">
                     <label class="text-caption">
                       <VIcon icon="fa fa-paperclip" size="12"></VIcon> {{ item.attachments.length }} Attachments
                     </label>
@@ -53,8 +52,6 @@ const progress = computed(() => {
                     </div>
                   </div>
                 </VCardText>
-                <VDivider></VDivider>
-
                 <VCardActions>
                   <div>
                     <VChip class="mr-2" v-for="(tag, i) in item.tags" :key="i" :color="tagsColorMap[tag]">
@@ -115,5 +112,13 @@ const progress = computed(() => {
   /* Internet Explorer/Edge */
   -webkit-user-select: none;
   /* Safari/Chrome */
+}
+
+
+.truncate-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 </style>
