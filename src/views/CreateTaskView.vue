@@ -93,12 +93,8 @@ const loadFileThumbnails = () => {
               <VFileInput v-show="false" ref="fileInput" v-model="formData.attachments" @change="onChangeFileLoad"
                 multiple label="Attachments" required :rules="attachmentRules"></VFileInput>
 
-              <VBtn prepend-icon="fa fa-paperclip" @click="() => {
-                fileInput.click()
-              }"> Attachments </VBtn>
-
-              <VContainer>
-                <VRow style="height: 250px; overflow-y: scroll;">
+              <VContainer class="bg-grey-lighten-4 rounded mb-2">
+                <VRow style="height: 250px; overflow-y: scroll;" v-if="fileThumbnails.length">
                   <VCol cols="12" md="6" v-for="(item, i) in fileThumbnails" class="pa-2 flex align-center">
                     <div class="mr-1 rounded  border flex justify-center align-center"
                       style="min-width: 64px; width: 64px; height: 64px;">
@@ -118,6 +114,11 @@ const loadFileThumbnails = () => {
                       </div>
                     </div>
                   </VCol>
+                </VRow>
+                <VRow v-else style="height: 250px; overflow-y: scroll;" class="flex align-center justify-center">
+                  <VBtn prepend-icon="fa fa-paperclip" @click="() => {
+                    fileInput.click()
+                  }"> Attachments </VBtn>
                 </VRow>
               </VContainer>
 
