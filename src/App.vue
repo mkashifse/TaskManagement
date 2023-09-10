@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import type { ITask } from './stores/store';
 import type VTask from './components/VTask.vue';
 import { v4 } from "uuid"
+import { computed } from 'vue';
 
 enum ColumnType {
   Pending = 'pending',
@@ -26,20 +27,32 @@ const board = ref<Board>({
 const dragItem = ref<ITask>();
 const dragFrom = ref<string>("")
 const dragTo = ref<string>("")
+const dragItemId = ref<string>("")
+const isDragging = ref<boolean>(false)
 
 function allowDrop(ev: any) {
-  ev.preventDefault() 
+  ev.preventDefault()
   dragTo.value = ev.target.getAttribute("data-column");
   console.log(dragTo.value)
 
 }
 
 function drag(ev: any) {
-  const dragItemId = ev.target.getAttribute("data-id")
+  dragItemId.value = ev.target.getAttribute("data-id")
   dragFrom.value = ev.target.getAttribute("data-column");
   const column = board.value[dragFrom.value as ColumnType];
-  dragItem.value = column.find((item) => item.id === dragItemId);
+  dragItem.value = column.find((item) => item.id === dragItemId.value);
+  isDragging.value = true;
 }
+
+function dragEnd() {
+  isDragging.value = false;
+}
+
+const highlightDragItem = (id: string) => {
+  return isDragging.value && id === dragItemId.value ? 'bg-blue-darken-4' : ''
+}
+
 
 function drop(ev: any) {
   console.log(dragFrom.value, "===>>>>>>", dragTo);
@@ -58,11 +71,13 @@ function drop(ev: any) {
     <VContainer fluid>
       <VRow>
         <VCol v-for="(column, i) of board">
-          <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" @drop.self="drop" @dragover="allowDrop" :data-column="i">
-            <h3 style="text-transform: capitalize;" class="border" >{{ i }}</h3>
+          <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" @drop.self="drop" @dragover="allowDrop"
+            :data-column="i">
+            <h3 style="text-transform: capitalize;" class="border">{{ i }}</h3>
             <!-- Task Template -->
             <VSheet border rounded class="pa-2 mb-2" v-for="(item, j) of column" :key="j" :title="item.title"
-              draggable="true" @drag="drag" :data-id="item.id" :data-column="i">
+              draggable="true" @drag="drag" @dragend="dragEnd" :data-id="item.id" :data-column="i"
+              :class="highlightDragItem(item.id!)">
               <div>
                 <label class="text-caption">Task:</label>
                 <p>{{ item.title }}</p>
