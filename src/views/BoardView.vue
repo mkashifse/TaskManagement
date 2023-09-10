@@ -4,7 +4,7 @@ import { useStore } from "@/stores/store"
 import moment from "moment"
 import { computed, ref } from "vue";
 
-const { board, totalTasks } = useStore()
+const { board, totalTasks, tagsColorMap } = useStore()
 const { onDragStart, onDragEnd, onDrag, onDragOver, highlightDragItem } = useDragDrop()
 
 const skill = ref<number>(20)
@@ -45,12 +45,23 @@ const progress = computed(() => {
                   <p>{{ item.description }}</p>
                 </div>
                 <div>
-                  <label class="text-caption">Estimated Date: {{ item.isPlaceholder }}</label>
+                  <label class="text-caption">Estimated Date:</label>
                   <p>{{ moment(item.estimatedDate).format("YYYY/MM/DD") }} {{ item.estimatedTime }}</p>
                 </div>
                 <div>
-                  <label class="text-caption">Attachments:</label>
-                  <p>{{ item.attachments }}</p>
+                  <label class="text-caption mr-2">TAGS:</label>
+                  <div>
+                    <VChip class="mr-2" v-for="(tag, i) in item.tags" :key="i" :color="tagsColorMap[tag]">{{ tag }}
+                    </VChip>
+                  </div>
+                </div>
+                <div v-if="item.attachments?.length">
+                  <label class="text-caption">
+                    <VIcon icon="fa fa-paperclip" size="12"></VIcon> Attachments:
+                  </label>
+                  <p>
+                    {{ item.attachments.length }} Files
+                  </p>
                 </div>
               </div>
             </VExpandTransition>

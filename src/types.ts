@@ -18,6 +18,7 @@ export interface ITask {
     estimatedDate?: string,
     attachments?: string,
     isPlaceholder: boolean,
+    tags: string[],
     ref: HTMLElement
 }
 

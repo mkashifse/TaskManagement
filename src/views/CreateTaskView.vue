@@ -60,7 +60,9 @@ const attachmentRules = [
 
 const submitForm = () => {
   loadFileThumbnails();
-  addTask(formData.value.selectedColumn, { id: v4(), isPlaceholder: false, ...formData.value } as any)
+  const newTask: any = { id: v4(), isPlaceholder: false, ...formData.value }
+  console.log(newTask);
+  addTask(formData.value.selectedColumn, newTask)
 };
 
 const onChangeFileLoad = (file: any) => {
@@ -142,7 +144,7 @@ const loadFileThumbnails = () => {
 
             </VCol>
             <VCol cols="12" sm="6">
-              <VCombobox multiple clearable label="Tags" :items="tags">
+              <VCombobox multiple clearable label="Tags" :items="tags" v-model="formData.tags">
                 <template v-slot:selection="data">
                   <v-chip :key="JSON.stringify(data.item)" v-bind="data.attrs" :model-value="data.selected"
                     :disabled="data.disabled" size="small" @click:close="data.parent.selectItem(data.item)"
