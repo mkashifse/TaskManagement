@@ -5,6 +5,7 @@ import type VTask from './components/VTask.vue';
 import { v4 } from "uuid"
 import { computed } from 'vue';
 import type { VueElement } from 'vue';
+import { findColumn, findTaskIndex } from './helper';
 
 enum ColumnType {
   Pending = 'pending',
@@ -26,83 +27,56 @@ const board = ref<Board>({
 
 
 const dragItem = ref<ITask>();
-const dragFrom = ref<string>("")
-const dragTo = ref<string>("")
-const dragItemId = ref<string>("")
+const columnFrom = ref<ColumnType>(ColumnType.Pending)
+const columnTo = ref<ColumnType>(ColumnType.Pending)
 const isDragging = ref<boolean>(false)
 const taskElements = ref<VueElement[]>([])
-const closestTaskIndex = ref<number>(0);
+const placeHolderIndex = ref<number>(0);
 
-function dragStart(ev: any) {
-  dragItemId.value = ev.target.getAttribute("data-id")
-  dragFrom.value = ev.target.getAttribute("data-column");
-  let dragFromColumn = board.value[dragFrom.value as ColumnType];
-  dragItem.value = dragFromColumn.find((item) => item.id === dragItemId.value);
+
+
+const onDragStart = (ev: DragEvent) => {
+  console.log("drag started...!!")
+  const el = (ev.target as HTMLElement);
+  el.classList.add('rotate')
+  const taskIndex = +(el.getAttribute("data-index") as any)
+  columnFrom.value = findColumn(el);
   isDragging.value = true;
-  dragFromColumn = dragFromColumn.filter((item) => item.id !== dragItem.value?.id)
+  dragItem.value = board.value[columnFrom.value as ColumnType][taskIndex];
 }
-
-
-function findColumn(childElement: any) {
-  let currentElement = childElement;
-
-  while (currentElement) {
-    const dataColumnAttribute = currentElement.getAttribute('data-column');
-    if (dataColumnAttribute) {
-      return dataColumnAttribute;
-    }
-
-    currentElement = currentElement.parentNode;
-  }
-
-  return null; // Return null if no grandparent with data-column attribute is found
-}
-
-
-function drag(ev: any) {
-  insertAboveTask(ev.clientY)
-}
-
-function insertAboveTask(mouseY: number) {
-  let closestOffset = Number.NEGATIVE_INFINITY;
-
-  taskElements.value.forEach((taskEl: any) => {
-    const { top } = taskEl.$el.getBoundingClientRect();
-    dragTo.value = findColumn(taskEl.$el);
-    const offset = mouseY - top;
-    if (offset < 0 && offset > closestOffset) {
-      closestOffset = offset;
-      const closestIndex = +taskEl.$el.getAttribute("data-index")
-      console.log(dragTo.value, closestIndex)
-      closestTaskIndex.value = closestIndex ? closestIndex : board.value[dragTo.value as ColumnType].length - 1
-      if (dragItem.value) {
-        for (let column in board.value) {
-          board.value[column as ColumnType] = board.value[column as ColumnType].filter((item: ITask) => !item.isPlaceholder)
-        }
-        const item = { ...dragItem.value, isPlaceholder: true }
-        board.value[dragTo.value as ColumnType].splice(closestTaskIndex.value, 0, item)
-      }
-    }
-  })
-}
-
-const resetAllTaskPlaceholders = () => {
-  for (let column in board.value) {
-    board.value[column as ColumnType] = board.value[column as ColumnType].filter((item: ITask) => dragItemId.value !== item.id || item.isPlaceholder)
-    board.value[column as ColumnType].forEach((item) => {
-      item.isPlaceholder = false;
-    })
-  }
-}
-
-function dragEnd() {
+const onDragEnd = (ev: DragEvent) => {
+  console.log("drag ends...!!")
   isDragging.value = false;
-  resetAllTaskPlaceholders()
+
+  // console.log(columnFrom.value, columnTo.value, dragItem.value?.title)
+  console.log(placeHolderIndex.value)
+  board.value[columnTo.value].splice(placeHolderIndex.value, 1, dragItem.value as any)
+
+}
+
+const onDragOver = (ev: DragEvent) => {
+  ev.preventDefault()
+  const el = (ev.target as HTMLElement);
+  columnTo.value = findColumn(el);
+  const nearTaskIndex = findTaskIndex(el)
+
+  // remove placeholder from all column
+  for (let column in board.value) {
+    board.value[column as ColumnType] = board.value[column as ColumnType].filter((item) => !item.isPlaceholder)
+  }
+
+
+  board.value[columnFrom.value] = board.value[columnFrom.value].filter((item) => item.id !== dragItem.value?.id)
+
+  const placeHolderItem = { isPlaceholder: true } as any
+  board.value[columnTo.value].splice(nearTaskIndex, 0, placeHolderItem)
+  placeHolderIndex.value = nearTaskIndex;
 }
 
 const highlightDragItem = (id: string) => {
-  return isDragging.value && id === dragItemId.value ? 'bg-blue-darken-4' : ''
+  return isDragging.value && id === dragItem.value?.id ? 'rotate' : ''
 }
+
 
 </script>
 
@@ -111,27 +85,31 @@ const highlightDragItem = (id: string) => {
     <VContainer fluid>
       <VRow>
         <VCol v-for="(column, i) of board">
-          <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" :data-column="i"  @drag="drag">
-            <h3 style="text-transform: capitalize;" class="border">{{ i }}</h3>
+          <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" :data-column="i" @dragover="onDragOver">
+            <h3 style="text-transform: capitalize;">{{ i }}</h3>
             <!-- Task Template -->
-            <VSheet border rounded class="pa-2 mb-2" ref="taskElements" v-for="(item, j) of column" :key="j"
-              :title="item.title" draggable="true" @dragstart="dragStart"
-              @dragend="dragEnd" :data-id="item.id" :data-index="j" :data-column="i" :class="highlightDragItem(item.id!)">
-              <div>
-                <label class="text-caption">Task:</label>
-                <p>{{ item.title }}</p>
+            <VSheet border rounded class="pa-2 mb-2" v-for="(item, j) of column" :key="j"
+              :title="item.title" draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" :data-index="j"
+              :class="highlightDragItem(item.id!)" >
+              <div v-if="item.isPlaceholder" style="height: 150px; background-color: rgb(29, 30, 43);">
               </div>
-              <div>
-                <label class="text-caption">Description:</label>
-                <p>{{ item.description }}</p>
-              </div>
-              <div>
-                <label class="text-caption">Estimated Time: {{ item.isPlaceholder }}</label>
-                <p>{{ item.estimatedTime }}</p>
-              </div>
-              <div>
-                <label class="text-caption">Attachments:</label>
-                <p>{{ item.attachments }}</p>
+              <div v-else>
+                <div>
+                  <label class="text-caption">Task:</label>
+                  <p>{{ item.title }}</p>
+                </div>
+                <div>
+                  <label class="text-caption">Description:</label>
+                  <p>{{ item.description }}</p>
+                </div>
+                <div>
+                  <label class="text-caption">Estimated Time: {{ item.isPlaceholder }}</label>
+                  <p>{{ item.estimatedTime }}</p>
+                </div>
+                <div>
+                  <label class="text-caption">Attachments:</label>
+                  <p>{{ item.attachments }}</p>
+                </div>
               </div>
             </VSheet>
             <div v-if="column.length === 0">
@@ -164,5 +142,11 @@ const highlightDragItem = (id: string) => {
 
 .flex-1 {
   flex: 1
+}
+
+.rotate {
+  transform: rotate(12deg) scale(1.1) skew(-11deg);
+  -webkit-transform: rotate(12deg) scale(1.1) skew(-11deg);
+  -moz-transform: rotate(12deg) scale(1.1) skew(-11deg);
 }
 </style>
