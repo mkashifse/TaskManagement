@@ -7,13 +7,13 @@ const formData = ref({
   title: '',
   description: '',
   estimatedTime: '',
-  estimatedDate: null,
-  attachments: null,
-
+  estimatedDate: '',
+  attachments: [],
 });
 
 const columns = ref<string[]>(["Pending", "Processing", "Done"])
 const formRef = ref<any>();
+const fileInput = ref<any>();
 const fileThumbnails = ref<{ name: string, src: string, type: string }[]>([]);
 
 
@@ -47,9 +47,15 @@ const onChangeFileLoad = (file: any) => {
   loadFileThumbnails();
 }
 
+
+const onDeleteFile = (index: number) => {
+  formData.value.attachments.splice(index, 1);
+  fileThumbnails.value.splice(index, 1)
+}
+
 const loadFileThumbnails = () => {
-  const files = formData.value.attachments as any;
-  if (files) {
+  const files = formData.value.attachments;
+  if (files.length) {
     fileThumbnails.value = [];
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader();
@@ -84,26 +90,31 @@ const loadFileThumbnails = () => {
               <v-textarea v-model="formData.description" label="Description" required
                 :rules="descriptionRules"></v-textarea>
 
-              <VFileInput v-model="formData.attachments" @change="onChangeFileLoad" multiple label="Attachments" required
-                :rules="attachmentRules"></VFileInput>
+              <VFileInput v-show="false" ref="fileInput" v-model="formData.attachments" @change="onChangeFileLoad"
+                multiple label="Attachments" required :rules="attachmentRules"></VFileInput>
 
+              <VBtn prepend-icon="fa fa-paperclip" @click="() => {
+                fileInput.click()
+              }"> Attachments </VBtn>
 
               <VContainer>
                 <VRow style="height: 250px; overflow-y: scroll;">
                   <VCol cols="12" md="6" v-for="(item, i) in fileThumbnails" class="pa-2 flex align-center">
-                    <div class=" mr-1 rounded  border flex justify-center align-center" style="width: 64px; height: 64px;">
+                    <div class="mr-1 rounded  border flex justify-center align-center"
+                      style="min-width: 64px; width: 64px; height: 64px;">
                       <img :src="item.src" width="32" height="32" v-if="item.type.includes('jpg')">
                       <object :data="item.src" width="32" height="32" v-else-if="item.type.includes('image')"></object>
                       <div v-else>
-                        <VIcon icon="fa-file"></VIcon>
+                        <VIcon icon="fa fa-file"></VIcon>
                       </div>
                     </div>
-                    <div class="flex-1">
+                    <div class="flex-1" style="max-width: 150px; text-overflow: ellipsis;">
                       {{ item.name }}
                     </div>
                     <div>
-                      <div class="border rounded" >
-                        <VIcon icon="fa-x"></VIcon>
+                      <div @click="onDeleteFile(i)" style="height: 34px;"
+                        class="border rounded-pill py-1 px-2 flex justify-center align-center">
+                        <VIcon icon="fa fa-x" size="16" color="red"></VIcon>
                       </div>
                     </div>
                   </VCol>
