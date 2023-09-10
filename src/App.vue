@@ -20,8 +20,8 @@ interface Board {
 
 const board = ref<Board>({
   pending: new Array(5).fill(1).map((item, i) => ({ id: v4(), title: 'Lorem ' + i, isPlaceholder: false })) as any,
-  processing: [],
-  done: []
+  processing: [{ id: v4(), title: 'Lorem 6', isPlaceholder: false }] as any,
+  done: [{ id: v4(), title: 'Lorem 7', isPlaceholder: false }] as any
 })
 
 
@@ -33,19 +33,31 @@ const isDragging = ref<boolean>(false)
 const taskElements = ref<VueElement[]>([])
 const closestTaskIndex = ref<number>(0);
 
-function allowDrop(ev: any) {
-  ev.preventDefault()
-  dragTo.value = ev.target.getAttribute("data-column");
-}
-
 function dragStart(ev: any) {
   dragItemId.value = ev.target.getAttribute("data-id")
   dragFrom.value = ev.target.getAttribute("data-column");
-  const column = board.value[dragFrom.value as ColumnType];
-  dragItem.value = column.find((item) => item.id === dragItemId.value);
+  let dragFromColumn = board.value[dragFrom.value as ColumnType];
+  dragItem.value = dragFromColumn.find((item) => item.id === dragItemId.value);
   isDragging.value = true;
-  board.value[dragFrom.value as ColumnType] = board.value[dragFrom.value as ColumnType].filter((item) => item.id !== dragItem.value?.id)
+  dragFromColumn = dragFromColumn.filter((item) => item.id !== dragItem.value?.id)
 }
+
+
+function findColumn(childElement: any) {
+  let currentElement = childElement;
+
+  while (currentElement) {
+    const dataColumnAttribute = currentElement.getAttribute('data-column');
+    if (dataColumnAttribute) {
+      return dataColumnAttribute;
+    }
+
+    currentElement = currentElement.parentNode;
+  }
+
+  return null; // Return null if no grandparent with data-column attribute is found
+}
+
 
 function drag(ev: any) {
   insertAboveTask(ev.clientY)
@@ -56,53 +68,42 @@ function insertAboveTask(mouseY: number) {
 
   taskElements.value.forEach((taskEl: any) => {
     const { top } = taskEl.$el.getBoundingClientRect();
+    dragTo.value = findColumn(taskEl.$el);
     const offset = mouseY - top;
     if (offset < 0 && offset > closestOffset) {
       closestOffset = offset;
-      const closestIndex = +taskEl.$el.getAttribute("data-ids").split('-')[1]
-      closestTaskIndex.value = closestIndex ? closestIndex : board.value.pending.length - 1
-      console.log("INDEX=>", closestTaskIndex.value)
+      const closestIndex = +taskEl.$el.getAttribute("data-index")
+      console.log(dragTo.value, closestIndex)
+      closestTaskIndex.value = closestIndex ? closestIndex : board.value[dragTo.value as ColumnType].length - 1
       if (dragItem.value) {
-        board.value.pending = board.value.pending.filter((item: ITask) => !item.isPlaceholder)
+        for (let column in board.value) {
+          board.value[column as ColumnType] = board.value[column as ColumnType].filter((item: ITask) => !item.isPlaceholder)
+        }
         const item = { ...dragItem.value, isPlaceholder: true }
-        board.value.pending.splice(closestTaskIndex.value, 0, item)
+        board.value[dragTo.value as ColumnType].splice(closestTaskIndex.value, 0, item)
       }
     }
   })
 }
 
+const resetAllTaskPlaceholders = () => {
+  for (let column in board.value) {
+    board.value[column as ColumnType] = board.value[column as ColumnType].filter((item: ITask) => dragItemId.value !== item.id || item.isPlaceholder)
+    board.value[column as ColumnType].forEach((item) => {
+      item.isPlaceholder = false;
+    })
+  }
+}
 
 function dragEnd() {
   isDragging.value = false;
-  console.log("EL===>>>>", taskElements.value)
-  console.log(board.value.pending.map((item) => item.isPlaceholder))
-  board.value.pending = board.value.pending.filter((item: ITask) => dragItemId.value !== item.id || item.isPlaceholder)
-  board.value.pending.forEach((item) => {
-    item.isPlaceholder = false;
-  })
+  resetAllTaskPlaceholders()
 }
 
 const highlightDragItem = (id: string) => {
   return isDragging.value && id === dragItemId.value ? 'bg-blue-darken-4' : ''
 }
 
-
-function drop(ev: any) {
-  // console.log(dragFrom.value, "===>>>>>>", dragTo.value);
-  // console.log([...board.value.pending])
-
-
-  // if (dragTo.value) {
-  //   console.log("DOING....")
-  //   // board.value[dragFrom.value as ColumnType] = board.value[dragFrom.value as ColumnType]
-  //   //   .filter((item) => item.id !== dragItem.value!.id)
-
-
-  //   // board.value[dragTo.value as ColumnType].push(dragItem.value!)
-  //   dragItemId.value = ''
-  // }
-
-}
 </script>
 
 <template>
@@ -110,13 +111,12 @@ function drop(ev: any) {
     <VContainer fluid>
       <VRow>
         <VCol v-for="(column, i) of board">
-          <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" @drop.self="drop" @dragover="allowDrop"
-            :data-column="i">
+          <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" :data-column="i"  @drag="drag">
             <h3 style="text-transform: capitalize;" class="border">{{ i }}</h3>
             <!-- Task Template -->
             <VSheet border rounded class="pa-2 mb-2" ref="taskElements" v-for="(item, j) of column" :key="j"
-              :title="item.title" draggable="true" @dragstart="dragStart" @drag="drag" @dragend="dragEnd"
-              :data-id="item.id" :data-ids="i + '-' + j" :data-column="i" :class="highlightDragItem(item.id!)">
+              :title="item.title" draggable="true" @dragstart="dragStart"
+              @dragend="dragEnd" :data-id="item.id" :data-index="j" :data-column="i" :class="highlightDragItem(item.id!)">
               <div>
                 <label class="text-caption">Task:</label>
                 <p>{{ item.title }}</p>
