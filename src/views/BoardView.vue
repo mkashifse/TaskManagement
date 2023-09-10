@@ -6,20 +6,7 @@ import { findColumn, findTaskIndex } from '../helper';
 import { ColumnType, type ITask } from '@/types';
 import { useStore } from "./../stores/store"
 
-const store = useStore()
-
-interface Board {
-  pending: ITask[],
-  processing: ITask[],
-  done: ITask[]
-}
-
-const board = ref<Board>({
-  pending: store.pendingTasks,
-  processing: [{ id: v4(), title: 'Lorem 6', isPlaceholder: false }] as any,
-  done: [{ id: v4(), title: 'Lorem 7', isPlaceholder: false }] as any
-})
-
+const { board } = useStore();
 
 const dragItem = ref<ITask>();
 const columnFrom = ref<ColumnType>(ColumnType.Pending)
@@ -36,7 +23,7 @@ const onDragStart = (ev: DragEvent) => {
   const taskIndex = +(el.getAttribute("data-index") as any)
   columnFrom.value = findColumn(el);
   isDragging.value = true;
-  dragItem.value = board.value[columnFrom.value as ColumnType][taskIndex];
+  dragItem.value = board[columnFrom.value as ColumnType][taskIndex];
 }
 const onDragEnd = (ev: DragEvent) => {
   console.log("drag ends...!!")
@@ -44,7 +31,7 @@ const onDragEnd = (ev: DragEvent) => {
 
   // console.log(columnFrom.value, columnTo.value, dragItem.value?.title)
   console.log(placeHolderIndex.value)
-  board.value[columnTo.value].splice(placeHolderIndex.value, 1, dragItem.value as any)
+  board[columnTo.value].splice(placeHolderIndex.value, 1, dragItem.value as any)
 
 }
 
@@ -62,18 +49,18 @@ const onDragOver = (ev: DragEvent) => {
   const nearTaskIndex = findTaskIndex(el)
 
   // remove placeholder from all column
-  for (let column in board.value) {
-    board.value[column as ColumnType] = board.value[column as ColumnType].filter((item) => !item.isPlaceholder)
+  for (let column in board) {
+    board[column as ColumnType] = board[column as ColumnType].filter((item) => !item.isPlaceholder)
   }
 
 
-  board.value[columnFrom.value] = board.value[columnFrom.value].filter((item) => item.id !== dragItem.value?.id)
+  board[columnFrom.value] = board[columnFrom.value].filter((item) => item.id !== dragItem.value?.id)
 
   const placeHolderItem = { isPlaceholder: true } as any
-  if (board.value[columnTo.value].length) {
-    board.value[columnTo.value].splice(nearTaskIndex, 0, placeHolderItem)
+  if (board[columnTo.value].length) {
+    board[columnTo.value].splice(nearTaskIndex, 0, placeHolderItem)
   } else {
-    board.value[columnTo.value].push(placeHolderItem)
+    board[columnTo.value].push(placeHolderItem)
   }
   placeHolderIndex.value = nearTaskIndex;
 }
