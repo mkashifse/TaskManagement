@@ -1,8 +1,17 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
 
+const router = useRouter()
 </script>
 
 <template>
+  <VToolbar>
+    <VToolbarItems>
+      <VBtn prepend-icon="fa fa-list-check">Kanban</VBtn>
+      <VBtn @click="() => router.push('/')">Board</VBtn>
+      <VBtn @click="() => router.push('/create-task')">Create New Task</VBtn>
+    </VToolbarItems>
+  </VToolbar>
   <main class="container">
     <router-view></router-view>
   </main>

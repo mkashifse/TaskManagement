@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { ITask } from './../stores/store';
 import { v4 } from "uuid"
 import type { VueElement } from 'vue';
 import { findColumn, findTaskIndex } from '../helper';
+import { ColumnType, type ITask } from '@/types';
+import { useStore } from "./../stores/store"
 
-enum ColumnType {
-  Pending = 'pending',
-  Processing = 'processing',
-  Done = 'done',
-}
+const store = useStore()
 
 interface Board {
   pending: ITask[],
@@ -18,7 +15,7 @@ interface Board {
 }
 
 const board = ref<Board>({
-  pending: new Array(5).fill(1).map((item, i) => ({ id: v4(), title: 'Lorem ' + i, isPlaceholder: false })) as any,
+  pending: store.pendingTasks,
   processing: [{ id: v4(), title: 'Lorem 6', isPlaceholder: false }] as any,
   done: [{ id: v4(), title: 'Lorem 7', isPlaceholder: false }] as any
 })

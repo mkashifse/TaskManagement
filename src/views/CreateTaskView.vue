@@ -1,21 +1,32 @@
 
 <script setup lang="ts">
+import { ColumnType, type ITask, type IThumb } from '@/types';
 import { ref } from 'vue';
+import { useStore } from "./../stores/store"
 
-const formData = ref({
-  selectedColumn: 'Pending',
+const store = useStore();
+
+const formData = ref<{
+  title: string;
+  description: string;
+  estimatedTime: string;
+  estimatedDate: string;
+  attachments: File[],
+  fileThumbnails: IThumb[]
+}>({
   title: '',
   description: '',
   estimatedTime: '',
   estimatedDate: '',
   attachments: [],
+  fileThumbnails: []
 });
 
-const columns = ref<string[]>(["Pending", "Processing", "Done"])
+const columns = ref<string[]>(["pending", "processing", "done"])
+const selectedColumn = ref<ColumnType>(ColumnType.Pending);
+const tags = ref<string[]>(["Task", "Bug", "Improvement", "Modification", "High Priority", "Low Priority"])
 const formRef = ref<any>();
 const fileInput = ref<any>();
-const fileThumbnails = ref<{ name: string, src: string, type: string }[]>([]);
-
 
 const titleRules = [
   (v: string) => !!v || 'Title is required',
@@ -39,33 +50,32 @@ const attachmentRules = [
 ];
 
 const submitForm = () => {
-  console.log(formData.value)
   loadFileThumbnails();
+  console.log(formData.value)
+  store.addTask(selectedColumn.value, formData.value as any)
 };
 
 const onChangeFileLoad = (file: any) => {
   loadFileThumbnails();
 }
-
-
 const onDeleteFile = (index: number) => {
   formData.value.attachments.splice(index, 1);
-  fileThumbnails.value.splice(index, 1)
+  formData.value.fileThumbnails.splice(index, 1)
 }
 
 const loadFileThumbnails = () => {
   const files = formData.value.attachments;
   if (files.length) {
-    fileThumbnails.value = [];
+    formData.value.fileThumbnails = [];
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader();
       const { type, name } = files[i];
       reader.onload = (e: any) => {
-        fileThumbnails.value.push({
+        formData.value.fileThumbnails.push({
           src: e.target.result,
           type,
           name
-        } as any);
+        } as never);
       };
       reader.readAsDataURL(files[i]);
     }
@@ -76,6 +86,7 @@ const loadFileThumbnails = () => {
 
 
 <template>
+
   <VContainer class="pa-4">
     <v-form ref="form" @submit.prevent="submitForm">
       <VCard rounded>
@@ -84,7 +95,7 @@ const loadFileThumbnails = () => {
         <VContainer>
           <VRow>
             <VCol cols="12" sm="6">
-              <VSelect :items="columns" label="Board Column" v-model="formData.selectedColumn"></VSelect>
+              <VSelect :items="columns" label="Board Column" v-model="selectedColumn"></VSelect>
               <v-text-field v-model="formData.title" label="Title" required :rules="titleRules"></v-text-field>
 
               <v-textarea v-model="formData.description" label="Description" required
@@ -94,8 +105,8 @@ const loadFileThumbnails = () => {
                 multiple label="Attachments" required :rules="attachmentRules"></VFileInput>
 
               <VContainer class="bg-grey-lighten-4 rounded mb-2">
-                <VRow style="height: 250px; overflow-y: scroll;" v-if="fileThumbnails.length">
-                  <VCol cols="12" md="6" v-for="(item, i) in fileThumbnails" class="pa-2 flex align-center">
+                <VRow style="height: 250px; overflow-y: scroll;" v-if="formData.fileThumbnails.length">
+                  <VCol cols="12" md="6" v-for="(item, i) in formData.fileThumbnails" class="pa-2 flex align-center">
                     <div class="mr-1 rounded  border flex justify-center align-center"
                       style="min-width: 64px; width: 64px; height: 64px;">
                       <img :src="item.src" width="32" height="32" v-if="item.type.includes('jpg')">
@@ -124,6 +135,7 @@ const loadFileThumbnails = () => {
 
             </VCol>
             <VCol cols="12" sm="6">
+              <VCombobox :items="tags" clearable chips multiple label="Tags"></VCombobox>
               <VTextField type="time" v-model="formData.estimatedTime" label="Estimated Time" required
                 :rules="estimatedTimeRules"></VTextField>
               <VDatePicker v-model="formData.estimatedDate" label="Estimated Date" required :rules="estimatedDateRules">
