@@ -20,7 +20,7 @@ import { VDatePicker } from 'vuetify/labs/VDatePicker'
 const vuetify = createVuetify({
   components:{
     ...components,
-    VDatePicker
+    VDatePicker,
   },
   directives,
   icons: {
