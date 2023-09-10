@@ -38,7 +38,6 @@ const placeHolderIndex = ref<number>(0);
 const onDragStart = (ev: DragEvent) => {
   console.log("drag started...!!")
   const el = (ev.target as HTMLElement);
-  el.classList.add('rotate')
   const taskIndex = +(el.getAttribute("data-index") as any)
   columnFrom.value = findColumn(el);
   isDragging.value = true;
@@ -69,7 +68,11 @@ const onDragOver = (ev: DragEvent) => {
   board.value[columnFrom.value] = board.value[columnFrom.value].filter((item) => item.id !== dragItem.value?.id)
 
   const placeHolderItem = { isPlaceholder: true } as any
-  board.value[columnTo.value].splice(nearTaskIndex, 0, placeHolderItem)
+  if (board.value[columnTo.value].length) {
+    board.value[columnTo.value].splice(nearTaskIndex, 0, placeHolderItem)
+  } else {
+    board.value[columnTo.value].push(placeHolderItem)
+  }
   placeHolderIndex.value = nearTaskIndex;
 }
 
@@ -88,9 +91,9 @@ const highlightDragItem = (id: string) => {
           <VSheet border rounded class="pa-3 bg-blue-lighten-5" elevation="4" :data-column="i" @dragover="onDragOver">
             <h3 style="text-transform: capitalize;">{{ i }}</h3>
             <!-- Task Template -->
-            <VSheet border rounded class="pa-2 mb-2" v-for="(item, j) of column" :key="j"
-              :title="item.title" draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" :data-index="j"
-              :class="highlightDragItem(item.id!)" >
+            <VSheet border rounded class="pa-2 mb-2" v-for="(item, j) of column" :key="j" :title="item.title"
+              draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" :data-index="j"
+              :class="highlightDragItem(item.id!)">
               <div v-if="item.isPlaceholder" style="height: 150px; background-color: rgb(29, 30, 43);">
               </div>
               <div v-else>

@@ -2,11 +2,12 @@ export function findItemByAttribute(childElement: any, attr: string) {
     let currentElement = childElement;
 
     while (currentElement) {
-        const dataColumnAttribute = currentElement.getAttribute(attr);
-        if (dataColumnAttribute) {
-            return dataColumnAttribute;
+        if ("getAttribute" in currentElement) {
+            const dataColumnAttribute = currentElement.getAttribute(attr);
+            if (dataColumnAttribute) {
+                return dataColumnAttribute;
+            }
         }
-
         currentElement = currentElement.parentNode;
     }
 
