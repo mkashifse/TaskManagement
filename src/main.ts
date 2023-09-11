@@ -15,8 +15,6 @@ import { aliases, fa } from 'vuetify/iconsets/fa'
 import colors from 'vuetify/lib/util/colors'
 import { VDatePicker } from 'vuetify/labs/VDatePicker'
 
-
-
 const vuetify = createVuetify({
   components:{
     ...components,
