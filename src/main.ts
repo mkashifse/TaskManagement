@@ -12,7 +12,6 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { aliases, fa } from 'vuetify/iconsets/fa'
-import colors from 'vuetify/lib/util/colors'
 import { VDatePicker } from 'vuetify/labs/VDatePicker'
 
 const vuetify = createVuetify({
@@ -32,11 +31,6 @@ const vuetify = createVuetify({
     themes: {
       light: {
         dark: false,
-        colors: {
-          primary: colors.blue.darken3, // #E53935
-          secondary: colors.red.lighten4, // #FFCDD2
-          success: colors.green.lighten4, // #FFCDD2
-        }
       },
     },
   },
