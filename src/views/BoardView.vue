@@ -45,7 +45,6 @@ const onDeleteTask = (ev: Event, colType: ColumnType, taskIndex: number) => {
     colType,
     taskIndex
   }
-  // deleteTask(colType, taskIndex)
 }
 
 </script>
@@ -114,7 +113,7 @@ const onDeleteTask = (ev: Event, colType: ColumnType, taskIndex: number) => {
         <v-card class="pa-2" border>
           <v-card-title>Comments</v-card-title>
           <div class="mb-2">
-            <VTextarea v-model="commentBox"></VTextarea>
+            <VTextarea v-model="commentBox" label="Add Comment"></VTextarea>
             <div class=" flex justify-end">
               <VBtn class="mb-2 mr-1" @click="addComment">Add Comment</VBtn>
             </div>
@@ -166,16 +165,17 @@ const onDeleteTask = (ev: Event, colType: ColumnType, taskIndex: number) => {
                         <VIcon v-else icon="fa fa-file"></VIcon>
                       </template>
                     </div>
-
                   </div>
                 </VCardText>
+                <div class="mt-4 ml-2">
+                  <VChip class="mr-2 mb-2" v-for="(tag, i) in item.tags" :key="i" :color="tagsColorMap[tag]">
+                    <VIcon icon="fa fa-tag" class="mr-2" size="16"></VIcon>
+                    {{ tag }}
+                  </VChip>
+                </div>
+                <VDivider></VDivider>
                 <VCardActions>
-                  <div>
-                    <VChip class="mr-2" v-for="(tag, i) in item.tags" :key="i" :color="tagsColorMap[tag]">
-                      <VIcon icon="fa fa-tag" class="mr-2" size="16"></VIcon>
-                      {{ tag }}
-                    </VChip>
-                  </div>
+
                   <div class="flex justify-end">
                     <v-btn color="red" @click="onDeleteTask($event, i as ColumnType, j)">DELETE</v-btn>
                   </div>
