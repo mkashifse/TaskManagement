@@ -1,17 +1,24 @@
 <script setup lang="ts">
 import { useDragDrop } from "@/composables/useDragDrop";
 import { useStore } from "@/stores/store"
+import type { ITask } from "@/types";
 import moment from "moment"
 import { computed, ref } from "vue";
 
 const { board, totalTasks, tagsColorMap } = useStore()
 const { onDragStart, onDragEnd, onDrag, onDragOver, highlightDragItem } = useDragDrop()
 
-const skill = ref<number>(20)
-
 const progress = computed(() => {
   return ((board.done.length / totalTasks) * 100).toFixed(0);
 })
+
+const isShowModal = ref(false)
+const selectedTask = ref<ITask>();
+
+const showModal = (task: ITask) => {
+  isShowModal.value = true;
+  selectedTask.value = task;
+}
 
 </script>
 
@@ -23,6 +30,47 @@ const progress = computed(() => {
       </template>
     </v-progress-linear>
   </VSheet>
+  <VDialog v-model="isShowModal" width="60%">
+    <VCard>
+      <VCardTitle>Task Detail</VCardTitle>
+      <VDivider></VDivider>
+      <VCardItem>
+
+        <VContainer>
+          <VRow>
+            <VCol cols="12" sm="6">
+              <strong>Title</strong>
+              <p class="mb-2">{{ selectedTask?.title }}</p>
+              <strong>Description</strong>
+              <p class="mb-2" style="height: 300px; overflow-y: scroll;">{{ selectedTask?.description }}</p>
+              <strong>Estimated Time</strong>
+              <div class="mb-2">
+                {{ moment(selectedTask?.estimatedDate).format("YYYY/MM/DD") }} {{ selectedTask?.estimatedTime }}
+              </div>
+              <strong>Labels</strong>
+              <div class="mb-2">
+                <VChip class="mr-2" v-for="(tag, i) in selectedTask?.tags" :color="tagsColorMap[tag]" :key="i">
+                  <VIcon icon="fa fa-tag" class="mr-2" size="16"></VIcon>
+                  {{ tag }}
+                </VChip>
+              </div>
+            </VCol>
+            <VCol cols="12" sm="6">
+              <VCarousel>
+                <VCarouselItem v-for="(img, i) in selectedTask?.fileThumbnails" :key="i">
+                  <VImg :src="img.src" aspect-ratio="4/3" hide-delimiters> </VImg>
+                </VCarouselItem>
+              </VCarousel>
+            </VCol>
+          </VRow>
+        </VContainer>
+
+      </VCardItem>
+      <VCardActions>
+
+      </VCardActions>
+    </VCard>
+  </VDialog>
   <VContainer>
     <VRow>
       <VCol v-for="(column, i) of board" cols="12" sm="4">
@@ -30,13 +78,13 @@ const progress = computed(() => {
           <h3 style="text-transform: capitalize;" class="no-select">{{ i }}</h3>
           <!-- Task Template -->
           <div class="mb-2 bg-placeholder rounded border" v-for="(item, j) of column" :key="j" :title="item.title"
-            draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" @drag="onDrag" :data-index="j"
-            :class="highlightDragItem(item)">
+            draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" @drag="onDrag" @click="showModal(item)"
+            :data-index="j" :class="highlightDragItem(item)">
             <VExpandTransition>
               <div v-if="item.isPlaceholder" style="height: 150px;">
               </div>
               <div v-else>
-                <VCardTitle >{{ item.title }} </VCardTitle>
+                <VCardTitle>{{ item.title }} </VCardTitle>
                 <VDivider></VDivider>
                 <VCardText class="truncate-text">
                   {{ item.description }}
