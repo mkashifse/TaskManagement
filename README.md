@@ -1,5 +1,8 @@
 # TaskManagement
 
+## Live on Vercel Server
+- Link: https://task-management-one-kappa.vercel.app/
+
 ## Features added
 - Kanban Board Columns [Pending, Processing, Done]
 - AddNewTask page is for creating new task with the required data
