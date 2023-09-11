@@ -4,8 +4,12 @@ import TaskDetail from "@/components/TaskDetail.vue";
 import { useDragDrop } from "@/composables/useDragDrop";
 import { useStore } from "@/stores/store"
 import type { ColumnType, ITask } from "@/types";
+import { watch } from "vue";
 import { computed, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
+const router = useRouter();
+const route = useRoute();
 const { board, totalTasks, tagsColorMap, deleteTask } = useStore()
 const { onDragStart, onDragEnd, onDrag, onDragOver, highlightDragItem } = useDragDrop()
 
@@ -16,10 +20,18 @@ const progress = computed(() => {
 const isShowModal = ref(false)
 const selectedTask = ref<ITask>();
 
-const showModal = (task: ITask) => {
+const showModal = (task: ITask, colType: ColumnType) => {
   isShowModal.value = true;
   selectedTask.value = task;
 }
+
+watch(route, () => {
+  const { id, colType } = route.query;
+  if (id && colType) {
+    const task = board[colType as ColumnType].find((item: ITask) => item.id === id)
+    showModal(task!, colType as ColumnType)
+  }
+}, { deep: true })
 
 const isShowPromptModal = ref<boolean>(false);
 const deletableTask = ref<{ colType: ColumnType, taskIndex: number, }>({} as any)
@@ -58,8 +70,8 @@ const onDeleteTask = (ev: Event, colType: ColumnType, taskIndex: number) => {
           <h3 style="text-transform: capitalize;" class="no-select">{{ i }}</h3>
           <!-- Task Template -->
           <div class="mb-2 bg-placeholder rounded border" v-for="(item, j) of column" :key="j" :title="item.title"
-            draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" @drag="onDrag" @click="showModal(item)"
-            :data-index="j" :class="highlightDragItem(item)">
+            draggable="true" @dragstart="onDragStart" @dragend="onDragEnd" @drag="onDrag"
+            @click="router.push(`/?id=${item.id}&colType=${i}`)" :data-index="j" :class="highlightDragItem(item)">
             <VExpandTransition>
               <div v-if="item.isPlaceholder" style="height: 150px;">
               </div>
