@@ -25,6 +25,12 @@ const showModal = (task: ITask, colType: ColumnType) => {
   selectedTask.value = task;
 }
 
+watch(isShowModal, () => {
+  if (!isShowModal.value) {
+    router.push({ name: 'BoardView', query: {} })
+  }
+})
+
 watch(route, () => {
   const { id, colType } = route.query;
   if (id && colType) {
