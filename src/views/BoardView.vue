@@ -12,7 +12,7 @@ const progress = computed(() => {
   return ((board.done.length / totalTasks) * 100).toFixed(0);
 })
 
-const isShowModal = ref(true)
+const isShowModal = ref(false)
 const selectedTask = ref<ITask>();
 
 const showModal = (task: ITask) => {
