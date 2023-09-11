@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type ConfirmBoxVue from "@/components/ConfirmBox.vue";
+import ConfirmBox from "@/components/ConfirmBox.vue";
 import TaskDetail from "@/components/TaskDetail.vue";
 import { useDragDrop } from "@/composables/useDragDrop";
 import { useStore } from "@/stores/store"
@@ -39,11 +39,11 @@ watch(route, () => {
   }
 }, { deep: true })
 
-const isShowPromptModal = ref<boolean>(false);
+const isShowDeletePrompt = ref<boolean>(false);
 const deletableTask = ref<{ colType: ColumnType, taskIndex: number, }>({} as any)
 const onDeleteTask = (ev: Event, colType: ColumnType, taskIndex: number) => {
   ev.stopPropagation();
-  isShowPromptModal.value = true;
+  isShowDeletePrompt.value = true;
   deletableTask.value = {
     colType,
     taskIndex
@@ -60,10 +60,10 @@ const onDeleteTask = (ev: Event, colType: ColumnType, taskIndex: number) => {
       </template>
     </v-progress-linear>
   </VSheet>
-  <VDialog v-model="isShowPromptModal" width="40%">
-    <ConfirmBoxVue @cancel="isShowPromptModal = false"
-      @confirm="() => { deleteTask(deletableTask.colType, deletableTask.taskIndex); isShowPromptModal = false }">
-    </ConfirmBoxVue>
+  <VDialog v-model="isShowDeletePrompt" width="40%">
+    <ConfirmBox @cancel="() => isShowDeletePrompt = false"
+      @confirm="() => { deleteTask(deletableTask.colType, deletableTask.taskIndex); isShowDeletePrompt = false }">
+    </ConfirmBox>
   </VDialog>
 
   <VDialog v-model="isShowModal" width="60%">

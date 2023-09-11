@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import type { ColumnType } from '@/types';
 
-defineProps<{ deletableTask: { colType: ColumnType, taskIndex: number } }>()
 const emit = defineEmits(["cancel", "confirm"])
 
 </script>
