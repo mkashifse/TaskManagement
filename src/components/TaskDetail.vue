@@ -4,7 +4,7 @@ import type { ITask } from '@/types';
 import { ref } from 'vue';
 import moment from "moment"
 
-const props = defineProps<{ selectedTask: ITask }>()
+defineProps<{ selectedTask: ITask }>()
 const { tagsColorMap } = useStore()
 
 const comments = ref<{ text: string; author: string }[]>([
