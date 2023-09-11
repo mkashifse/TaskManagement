@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useStore } from '@/stores/store';
 import type { ITask } from '@/types';
-import { ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import moment from "moment"
 
 defineProps<{ selectedTask: ITask }>()

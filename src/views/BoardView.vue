@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type ConfirmBoxVue from "@/components/ConfirmBox.vue";
 import TaskDetail from "@/components/TaskDetail.vue";
 import { useDragDrop } from "@/composables/useDragDrop";
 import { useStore } from "@/stores/store"
@@ -42,20 +43,13 @@ const onDeleteTask = (ev: Event, colType: ColumnType, taskIndex: number) => {
     </v-progress-linear>
   </VSheet>
   <VDialog v-model="isShowPromptModal" width="40%">
-    <VCard>
-      <VCardTitle>Confirm Delete</VCardTitle>
-      <VCardText>Are you sure you want to delete this task?</VCardText>
-      <VCardActions class="justify-end">
-        <VBtn @click="isShowPromptModal = false">Cancel</VBtn>
-        <VBtn color="red"
-          @click="() => { deleteTask(deletableTask.colType, deletableTask.taskIndex); isShowPromptModal = false }">Confirm
-        </VBtn>
-      </VCardActions>
-    </VCard>
+    <ConfirmBoxVue @cancel="isShowPromptModal = false"
+      @confirm="() => { deleteTask(deletableTask.colType, deletableTask.taskIndex); isShowPromptModal = false }">
+    </ConfirmBoxVue>
   </VDialog>
 
   <VDialog v-model="isShowModal" width="60%">
-    <TaskDetail :selectedTask="selectedTask"></TaskDetail>
+    <TaskDetail :selectedTask="(selectedTask as any)"></TaskDetail>
   </VDialog>
   <VContainer>
     <VRow>
