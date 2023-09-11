@@ -28,6 +28,10 @@ export const useStore = defineStore('board', () => {
     board.value[colType].push(task);
   }
 
+  const deleteTask = (colType: ColumnType, taskIndex: number) => {
+    board.value[colType].splice(taskIndex, 1);
+  }
+
   const totalTasks = computed(() => {
     let count = 0;
     for (let column in board.value) {
@@ -50,6 +54,7 @@ export const useStore = defineStore('board', () => {
   return {
     board,
     addTask,
+    deleteTask,
     totalTasks,
     tagsColorMap
   }

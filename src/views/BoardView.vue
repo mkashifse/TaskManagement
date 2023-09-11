@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useDragDrop } from "@/composables/useDragDrop";
+import { findColumn } from "@/helper";
 import { useStore } from "@/stores/store"
-import type { ITask } from "@/types";
+import type { ColumnType, ITask } from "@/types";
 import moment from "moment"
 import { computed, ref } from "vue";
 
-const { board, totalTasks, tagsColorMap } = useStore()
+const { board, totalTasks, tagsColorMap, deleteTask } = useStore()
 const { onDragStart, onDragEnd, onDrag, onDragOver, highlightDragItem } = useDragDrop()
 
 const progress = computed(() => {
@@ -34,6 +35,19 @@ const addComment = () => {
   }
 }
 
+
+const isShowPromptModal = ref<boolean>(false);
+const deletableTask = ref<{ colType: ColumnType, taskIndex: number, }>({} as any)
+const onDeleteTask = (ev: Event, colType: ColumnType, taskIndex: number) => {
+  ev.stopPropagation();
+  isShowPromptModal.value = true;
+  deletableTask.value = {
+    colType,
+    taskIndex
+  }
+  // deleteTask(colType, taskIndex)
+}
+
 </script>
 
 <template>
@@ -44,6 +58,18 @@ const addComment = () => {
       </template>
     </v-progress-linear>
   </VSheet>
+  <VDialog v-model="isShowPromptModal" width="40%">
+    <VCard>
+      <VCardTitle>Confirm Delete</VCardTitle>
+      <VCardText>Are you sure you want to delete this task?</VCardText>
+      <VCardActions class="justify-end">
+        <VBtn @click="isShowPromptModal = false">Cancel</VBtn>
+        <VBtn color="red"
+          @click="() => { deleteTask(deletableTask.colType, deletableTask.taskIndex); isShowPromptModal = false }">Confirm
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
   <VDialog v-model="isShowModal" width="60%">
     <VCard>
       <VCardTitle>Task Detail</VCardTitle>
@@ -69,11 +95,16 @@ const addComment = () => {
               </div>
             </VCol>
             <VCol cols="12" sm="6">
-              <VCarousel>
+              <VCarousel v-if="selectedTask && selectedTask.fileThumbnails && selectedTask?.fileThumbnails?.length">
                 <VCarouselItem v-for="(img, i) in selectedTask?.fileThumbnails" :key="i">
                   <VImg :src="img.src" aspect-ratio="4/3" hide-delimiters> </VImg>
                 </VCarouselItem>
               </VCarousel>
+              <div v-else border class="flex justify-center align-center">
+                <div>
+                  No Attachments Found
+                </div>
+              </div>
             </VCol>
           </VRow>
         </VContainer>
@@ -135,6 +166,7 @@ const addComment = () => {
                         <VIcon v-else icon="fa fa-file"></VIcon>
                       </template>
                     </div>
+
                   </div>
                 </VCardText>
                 <VCardActions>
@@ -143,6 +175,9 @@ const addComment = () => {
                       <VIcon icon="fa fa-tag" class="mr-2" size="16"></VIcon>
                       {{ tag }}
                     </VChip>
+                  </div>
+                  <div class="flex justify-end">
+                    <v-btn color="red" @click="onDeleteTask($event, i as ColumnType, j)">DELETE</v-btn>
                   </div>
                 </VCardActions>
               </div>
