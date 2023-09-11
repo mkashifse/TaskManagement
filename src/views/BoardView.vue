@@ -20,6 +20,20 @@ const showModal = (task: ITask) => {
   selectedTask.value = task;
 }
 
+const comments = ref<{ text: string; author: string }[]>([
+  { text: 'This is the first comment.', author: 'User A' },
+  { text: 'Here is another comment.', author: 'User B' },
+  { text: 'A third comment goes here.', author: 'User C' },
+  // Add more sample comments as needed
+]);
+
+const commentBox = ref<string>("");
+const addComment = () => {
+  if (commentBox.value) {
+    comments.value.push({ text: commentBox.value, author: 'John Doe' });
+  }
+}
+
 </script>
 
 <template>
@@ -65,6 +79,30 @@ const showModal = (task: ITask) => {
           </VRow>
         </VContainer>
 
+      </VCardItem>
+      <VCardItem>
+        <v-card class="pa-2" border>
+          <v-card-title>Comments</v-card-title>
+          <VCardItem class="mb-2">
+            <VTextarea v-model="commentBox"></VTextarea>
+            <div class=" flex justify-end">
+              <VBtn class="mb-2 mr-1" @click="addComment">Add Comment</VBtn>
+            </div>
+          </VCardItem>
+          <VCardItem>
+            <template v-for="(comment, index) in comments.reverse()" :key="index">
+              <div class="flex align-center mb-4">
+                <VAvatar color="blue" class="mr-2">
+                  <VIcon icon="fa fa-user"></VIcon>
+                </VAvatar>
+                <div>
+                  <strong class="">{{ comment.author }}</strong>
+                  <div>{{ comment.text }}</div>
+                </div>
+              </div>
+            </template>
+          </VCardItem>
+        </v-card>
       </VCardItem>
       <VCardActions>
 
