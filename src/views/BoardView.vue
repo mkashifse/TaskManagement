@@ -12,7 +12,7 @@ const progress = computed(() => {
   return ((board.done.length / totalTasks) * 100).toFixed(0);
 })
 
-const isShowModal = ref(false)
+const isShowModal = ref(true)
 const selectedTask = ref<ITask>();
 
 const showModal = (task: ITask) => {
@@ -49,7 +49,6 @@ const addComment = () => {
       <VCardTitle>Task Detail</VCardTitle>
       <VDivider></VDivider>
       <VCardItem>
-
         <VContainer>
           <VRow>
             <VCol cols="12" sm="6">
@@ -83,14 +82,14 @@ const addComment = () => {
       <VCardItem>
         <v-card class="pa-2" border>
           <v-card-title>Comments</v-card-title>
-          <VCardItem class="mb-2">
+          <div class="mb-2">
             <VTextarea v-model="commentBox"></VTextarea>
             <div class=" flex justify-end">
               <VBtn class="mb-2 mr-1" @click="addComment">Add Comment</VBtn>
             </div>
-          </VCardItem>
-          <VCardItem>
-            <template v-for="(comment, index) in comments.reverse()" :key="index">
+          </div>
+          <div>
+            <template v-for="(comment, index) in comments" :key="index">
               <div class="flex align-center mb-4">
                 <VAvatar color="blue" class="mr-2">
                   <VIcon icon="fa fa-user"></VIcon>
@@ -101,7 +100,7 @@ const addComment = () => {
                 </div>
               </div>
             </template>
-          </VCardItem>
+          </div>
         </v-card>
       </VCardItem>
       <VCardActions>
