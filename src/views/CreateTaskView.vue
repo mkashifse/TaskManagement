@@ -13,7 +13,7 @@ const formData = ref<{
   title: string;
   description: string;
   estimatedTime: string;
-  estimatedDate: Date;
+  estimatedDate: any;
   attachments: File[],
   fileThumbnails: IThumb[],
   tags: string[],
@@ -149,9 +149,7 @@ const loadFileThumbnails = () => {
             <VCol cols="12" sm="6">
               <VCombobox multiple clearable label="Tags" :items="tags" v-model="formData.tags">
                 <template v-slot:selection="data">
-                  <v-chip :key="JSON.stringify(data.item)" v-bind="data.attrs" :model-value="data.selected"
-                    :disabled="data.disabled" size="small" @click:close="data.parent.selectItem(data.item)"
-                    :color="tagsColorMap[data.item.title]">
+                  <v-chip :key="JSON.stringify(data.item)" size="small" :color="tagsColorMap[data.item.title]">
                     <VIcon icon="fa fa-tag" class="mr-2"></VIcon>
                     {{ data.item.title }}
                   </v-chip>
